@@ -3,3 +3,5 @@ import { authRegis } from "../controllers/authController.js";
 
 const authRouter = express.Router();
 authRouter.post("/registertion", authRegis);
+
+export default authRegis;

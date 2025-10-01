@@ -21,7 +21,7 @@ export const userModel = db.define(
     freezeTableName: true,
     hooks: {
       beforeCreate: async (user) => {
-        const slat = await bcrypt.slat(10);
+        const slat = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(user.password, slat);
       },
     },
