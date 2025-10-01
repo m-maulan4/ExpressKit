@@ -16,6 +16,9 @@ export const userModel = db.define(
       type: Sequelize.STRING,
       allowNull: false,
     },
+    refresh_token: {
+      type: Sequelize.STRING,
+    },
   },
   {
     freezeTableName: true,

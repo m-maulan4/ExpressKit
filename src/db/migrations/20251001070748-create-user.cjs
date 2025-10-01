@@ -17,9 +17,12 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      Password: {
+      password: {
         type: Sequelize.STRING,
         allowNull: false,
+      },
+      refresh_token: {
+        type: Sequelize.STRING,
       },
       createdAt: {
         allowNull: false,

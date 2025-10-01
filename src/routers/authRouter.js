@@ -1,7 +1,15 @@
 import express from "express";
-import { authRegis } from "../controllers/authController.js";
+import {
+  authLogin,
+  authLogout,
+  authRegis,
+  authToken,
+} from "../controllers/authController.js";
 
 const authRouter = express.Router();
 authRouter.post("/registertion", authRegis);
+authRouter.post("/login", authLogin);
+authRouter.get("/logout", authLogout);
+authRouter.get("/newToken", authToken);
 
-export default authRegis;
+export default authRouter;
