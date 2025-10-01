@@ -1,7 +1,7 @@
-const { Sequelize } = require("sequelize");
-const bcrypt = require("bcrypt");
-const db = require("../db/config/db");
-const Users = db.define(
+import { Sequelize } from "sequelize";
+import bcrypt from "bcrypt";
+import { db } from "../db/config/db.js";
+export const userModel = db.define(
   "Users",
   {
     fullname: {
@@ -27,5 +27,4 @@ const Users = db.define(
     },
   }
 );
-Users.sync();
-module.exports = Users;
+userModel.sync();
