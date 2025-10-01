@@ -90,6 +90,6 @@ export const authToken = async (req, res) => {
         expiresIn: process.env.ACCESS_TOKEN_EXPIRED,
       }
     );
-    res.json({ usernmae: user.username, access_token: newAccessToken });
+    res.json({ username: user.username, access_token: newAccessToken });
   });
 };
