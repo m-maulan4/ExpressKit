@@ -51,13 +51,15 @@ export const authLogin = async (req, res) => {
       path: "/",
       sameSite: "strict",
     });
-    res.json({ access_token });
+    res.json({ username, access_token });
   } catch (error) {
     console.log(error);
   }
 };
 
 export const authLogout = async (req, res) => {
+  console.log(req.headers["authorization"]);
+
   const authHeader = req.headers["authorization"];
   const token = authHeader.split(" ")[1];
   if (!token) {

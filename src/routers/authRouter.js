@@ -7,9 +7,9 @@ import {
 } from "../controllers/authController.js";
 
 const authRouter = express.Router();
-authRouter.post("/registertion", authRegis);
-authRouter.post("/login", authLogin);
-authRouter.get("/logout", authLogout);
-authRouter.get("/newToken", authToken);
+authRouter.post("/auth/registertion", authRegis);
+authRouter.post("/auth/login", authLogin);
+authRouter.get("/auth/logout", authLogout);
+authRouter.get("/auth/newToken", authToken);
 
 export default authRouter;
