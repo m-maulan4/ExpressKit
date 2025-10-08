@@ -1,6 +1,7 @@
 import { userModel } from "../models/usersModel.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import crypto from "crypto";
 
 export const authRegis = async (req, res) => {
   const { fullname, username, password } = req.body;
@@ -22,6 +23,8 @@ export const authRegis = async (req, res) => {
 };
 
 export const authLogin = async (req, res) => {
+  if (!req.body)
+    return res.status(401).send({ msg: "Username dan Password tidak valid" });
   const { username, password } = req.body;
   if (!username || !password) {
     return res.status(401).send({ msg: "Username dan Password tidak valid" });
@@ -39,19 +42,32 @@ export const authLogin = async (req, res) => {
   try {
     const payload = { id: user.id, username: user.username };
     const refresh_token = jwt.sign(payload, process.env.REFRESH_TOKEN, {
-      expiresIn: process.env.REFRESH_TOKEN_EXPIRED,
+      expiresIn: "7d",
     });
     const access_token = jwt.sign(payload, process.env.ACCESS_TOKEN, {
-      expiresIn: process.env.ACCESS_TOKEN_EXPIRED,
+      expiresIn: "15m",
     });
+    const token_user = crypto
+      .createHash("sha256")
+      .update(username)
+      .digest("hex");
     await user.update({ refresh_token });
-    res.cookie("refresh_token", refresh_token, {
-      httpOnly: true,
-      secure: false, // set true jika pakai https
-      path: "/",
-      sameSite: "strict",
-    });
-    res.json({ username, access_token });
+    res
+      .cookie("refresh_token", refresh_token, {
+        httpOnly: true,
+        secure: false, // set true jika pakai https
+        path: "/",
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      })
+      .cookie("acces_token", access_token, {
+        httpOnly: true,
+        secure: false,
+        path: "/",
+        sameSite: "strict",
+        maxAge: 15 * 60 * 60 * 1000,
+      });
+    res.json({ username, token_user });
   } catch (error) {
     console.log(error);
   }
@@ -86,12 +102,25 @@ export const authToken = async (req, res) => {
   jwt.verify(refresh_token, process.env.REFRESH_TOKEN, async (err, user) => {
     if (err) return res.status(403).json({ msg: "Login terlebih dahulu" });
     const newAccessToken = jwt.sign(
-      { id: user.id, username: user.name },
+      { id: user.id, username: user.username },
       process.env.ACCESS_TOKEN,
       {
-        expiresIn: process.env.ACCESS_TOKEN_EXPIRED,
+        expiresIn: "15m",
       }
     );
-    res.json({ username: user.username, access_token: newAccessToken });
+
+    const token_user = crypto
+      .createHash("sha256")
+      .update(user.username)
+      .digest("hex");
+    res
+      .cookie("acces_token", newAccessToken, {
+        httpOnly: true,
+        secure: false,
+        path: "/",
+        sameSite: "strict",
+        maxAge: 15 * 60 * 60 * 1000,
+      })
+      .json({ username: user.username, token_user });
   });
 };
