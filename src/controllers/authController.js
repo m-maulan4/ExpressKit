@@ -2,6 +2,7 @@ import { userModel } from "../models/usersModel.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
+import { log } from "console";
 
 export const authRegis = async (req, res) => {
   const { fullname, username, password } = req.body;
@@ -60,7 +61,7 @@ export const authLogin = async (req, res) => {
         sameSite: "strict",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       })
-      .cookie("acces_token", access_token, {
+      .cookie("access_token", access_token, {
         httpOnly: true,
         secure: false,
         path: "/",
@@ -74,25 +75,19 @@ export const authLogin = async (req, res) => {
 };
 
 export const authLogout = async (req, res) => {
-  console.log(req.headers["authorization"]);
+  const refresh_token = req.cookies.refresh_token;
+  const user = await userModel
+    .findOne({
+      where: { refresh_token: refresh_token },
+    })
+    .finally();
 
-  const authHeader = req.headers["authorization"];
-  const token = authHeader.split(" ")[1];
-  if (!token) {
-    return res.status(401).json({ msg: "No token provided" });
-  }
-  jwt.verify(token, process.env.ACCESS_TOKEN, async (err, decoded) => {
-    if (err) {
-      console.log(err);
-      return res.status(403).json({ msg: "Token invalid" });
-    }
+  await user.update({ refresh_token: null });
 
-    const user = await userModel.findOne({
-      where: { username: decoded.username },
-    });
-    await user.update({ refresh_token: null });
-  });
-  res.clearCookie("refresh_token").json({ msg: "Berhasil keluar" });
+  res
+    .clearCookie("refresh_token")
+    .clearCookie("access_token")
+    .json({ msg: "Berhasil keluar" });
 };
 
 export const authToken = async (req, res) => {
@@ -114,7 +109,7 @@ export const authToken = async (req, res) => {
       .update(user.username)
       .digest("hex");
     res
-      .cookie("acces_token", newAccessToken, {
+      .cookie("access_token", newAccessToken, {
         httpOnly: true,
         secure: false,
         path: "/",
